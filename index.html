@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Caixa</title>
+    <style>
+        /* Estilos (mantidos como no seu código original) */
+        /* O estilo vai permanecer o mesmo */
+    </style>
+</head>
+<body>
+    <header>
+        <img id="logo" src="logo.JPG" alt="Logo">
+    </header>
+    <button class="login-button" onclick="showLoginModal()">LOGIN</button>
+    <img id="user-logo" class="user-logo" src="" alt="User Logo">
+    <main>
+        <h2>Controle do Caixa</h2>
+        <div class="balance">
+            Saldo Atual: R$ <span id="balance">0.00</span>
+        </div>
+
+        <div class="form-group">
+            <label for="add-amount">Adicionar Dinheiro:</label>
+            <input type="number" id="add-amount" placeholder="Valor a adicionar">
+            <button onclick="addMoney()">Adicionar</button>
+        </div>
+
+        <div class="form-group">
+            <label for="withdraw-amount">Retirar Dinheiro:</label>
+            <input type="number" id="withdraw-amount" placeholder="Valor a retirar">
+            <button onclick="withdrawMoney()">Retirar</button>
+        </div>
+
+        <div class="logs">
+            <h3>Logs de Operações:</h3>
+            <div id="logs"></div>
+        </div>
+    </main>
+
+    <script>
+        let balance = 0;
+        let currentUser = null;
+        const users = {
+            Ryan: "Ryanlima2004.",
+            Italo: "Italo123"
+        };
+        const userLogos = {
+            Ryan: "logoryan.JPG",
+            Italo: "logoitalo.JPG"
+        };
+
+        const balanceElement = document.getElementById('balance');
+        const logsElement = document.getElementById('logs');
+        const logoElement = document.getElementById('logo'); // logo.JPG fica fixa
+        const userLogoElement = document.getElementById('user-logo'); // logo do usuário à direita
+
+        // Carregar logs do localStorage
+        function loadLogs() {
+            const storedLogs = JSON.parse(localStorage.getItem('logs')) || [];
+            storedLogs.forEach(log => {
+                const logEntry = document.createElement('p');
+                logEntry.textContent = log;
+                logsElement.appendChild(logEntry);
+            });
+        }
+
+        // Salvar logs no localStorage
+        function saveLogs() {
+            const logs = [];
+            document.querySelectorAll('.logs p').forEach(log => {
+                logs.push(log.textContent);
+            });
+            localStorage.setItem('logs', JSON.stringify(logs));
+        }
+
+        function showLoginModal() {
+            const username = prompt("Digite seu usuário:");
+            const password = prompt("Digite sua senha:");
+            
+            if (users[username] && users[username] === password) {
+                currentUser = username;
+                userLogoElement.src = userLogos[username]; // Altera apenas a imagem do usuário
+                userLogoElement.style.display = "inline-block"; // Exibe a imagem do usuário
+                alert(`Bem-vindo, ${username}!`);
+            } else {
+                alert("Usuário ou senha inválidos.");
+                userLogoElement.style.display = "none"; // Esconde a imagem do usuário se o login falhar
+            }
+        }
+
+        function addMoney() {
+            if (!currentUser) {
+                alert("Faça login antes de realizar uma operação.");
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('add-amount').value);
+            if (!isNaN(amount) && amount > 0) {
+                balance += amount;
+                updateBalance();
+                logOperation('adicionado', amount);
+                document.getElementById('add-amount').value = '';
+            } else {
+                alert('Por favor, insira um valor válido para adicionar.');
+            }
+        }
+
+        function withdrawMoney() {
+            if (!currentUser) {
+                alert("Faça login antes de realizar uma operação.");
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            if (!isNaN(amount) && amount > 0) {
+                if (amount <= balance) {
+                    balance -= amount;
+                    updateBalance();
+                    logOperation('retirado', amount);
+                    document.getElementById('withdraw-amount').value = '';
+                } else {
+                    alert('Saldo insuficiente para realizar a retirada.');
+                }
+            } else {
+                alert('Por favor, insira um valor válido para retirar.');
+            }
+        }
+
+        function updateBalance() {
+            balanceElement.textContent = balance.toFixed(2);
+        }
+
+        // Enviar log para a página de logs
+        function logOperation(type, amount) {
+            const now = new Date();
+            const timestamp = now.toLocaleString('pt-BR');
+            const logMessage = `Usuário ${currentUser} ${type} R$ ${amount.toFixed(2)} em ${timestamp}.`;
+
+            // Criação do elemento de log na interface
+            const logEntry = document.createElement('p');
+            logEntry.textContent = logMessage;
+            logsElement.appendChild(logEntry);
+
+            // Enviar log para a página de logs externa
+            fetch('https://huzz100k.github.io/caixa-de-logs/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ log: logMessage })
+            }).catch((error) => {
+                console.error('Erro ao enviar log:', error);
+            });
+
+            saveLogs(); // Salva as logs após cada operação
+        }
+
+        // Carregar as logs ao carregar a página
+        window.onload = loadLogs;
+    </script>
+</body>
+</html>
