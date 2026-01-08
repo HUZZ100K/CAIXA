@@ -1,0 +1,11 @@
+{
+  "users": [
+    {
+      "id": "17ed2981-e666-4e24-be70-7ef0cdd8d02e",
+      "email": "ezmamber@gmail.com",
+      "salt": "7246c0482f95b741d4723c193a4e2aac",
+      "passHash": "8161506b155ffede99f715e5210e80e67b7934ca3ed998c8246078b2268c38dd",
+      "plan": "advanced"
+    }
+  ]
+}
