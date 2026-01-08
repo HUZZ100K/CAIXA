@@ -1,164 +1,639 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciamento de Caixa</title>
-    <style>
-        /* Estilos (mantidos como no seu código original) */
-        /* O estilo vai permanecer o mesmo */
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTA Script Tool</title>
+
+<style>
+:root{
+  --bg:#0f1115;
+  --panel:#151923;
+  --panel2:#10131a;
+  --border:#232a36;
+  --text:#e7ecf3;
+  --muted:#9aa4b2;
+
+  --accent:#4f9cff;
+  --accent2:#7c5cff;
+
+  --danger:#ff5c7a;
+}
+
+*{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{
+  margin:0;
+  color:var(--text);
+  background: var(--bg);
+  overflow-x:hidden;
+}
+
+/* fundo gradiente animado */
+body{
+  margin:0;
+  color:var(--text);
+  background: var(--bg);
+  overflow-x:hidden;
+}
+@keyframes floatBg{
+  from{ transform: translate3d(-2%, -1%, 0) scale(1.02) rotate(-1deg); }
+  to{ transform: translate3d(2%, 1%, 0) scale(1.06) rotate(1deg); }
+}
+
+header{
+  position:sticky;top:0;z-index:10;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,45,45,.18);
+  padding:14px 18px;
+  display:flex;justify-content:space-between;align-items:center
+}
+.brand{display:flex;gap:10px;align-items:center;font-weight:800}
+.dot{
+  width:10px;height:10px;border-radius:99px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  box-shadow:0 0 18px rgba(255,45,45,.30)
+}
+.pill{
+  padding:6px 10px;border:1px solid rgba(255,45,45,.22);
+  border-radius:999px;background:rgba(255,255,255,.03);
+  font-size:12px;color:var(--muted)
+}
+.pill.alpha{
+  color:#fff;
+  border-color: rgba(255,45,45,.35);
+  background: rgba(255,45,45,.10);
+}
+
+main{max-width:1100px;margin:24px auto;padding:18px}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px
+}
+
+.card{
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+  border:1px solid rgba(255,45,45,.20);
+  border-radius:var(--r);
+  box-shadow:var(--shadow);
+  padding:18px
+}
+
+.action{cursor:pointer;transition:.15s;position:relative}
+.action:hover{transform:translateY(-3px);border-color:rgba(255,45,45,.55)}
+.action h3{margin:0 0 6px;color:var(--accent)}
+.action p{margin:0;color:var(--muted);font-size:13px}
+.tag{
+  position:absolute;right:14px;top:14px;
+  font-size:11px;color:var(--muted);
+  border:1px solid rgba(255,45,45,.20);
+  padding:5px 8px;border-radius:999px
+}
+
+.section{display:none;margin-top:18px}
+.section.active{display:block}
+
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.btn{
+  border:none;cursor:pointer;
+  padding:12px 14px;border-radius:12px;
+  font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:#0b0b10
+}
+.btn.secondary{
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  border:1px solid rgba(255,45,45,.20)
+}
+.btn.danger{background:var(--danger);color:#000}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.input,.textarea{
+  width:100%;padding:12px;
+  border-radius:12px;border:1px solid rgba(255,45,45,.20);
+  background:rgba(0,0,0,.25);color:var(--text)
+}
+.textarea{resize:none;min-height:90px}
+.label{font-size:12px;color:var(--muted);margin:10px 0 6px}
+
+.chatHeader{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px;border:1px solid rgba(255,45,45,.20);
+  border-radius:14px;background:rgba(0,0,0,.18)
+}
+.chatBox{
+  height:360px;overflow:auto;padding:14px;
+  border-radius:14px;border:1px solid rgba(255,45,45,.20);
+  background:rgba(0,0,0,.20);margin-top:14px
+}
+.bubble{
+  max-width:86%;padding:10px 12px;border-radius:14px;
+  border:1px solid rgba(255,45,45,.20);margin:8px 0;
+  white-space:pre-wrap;font-size:13px
+}
+.bubble.user{margin-left:auto;background:rgba(255,45,45,.10)}
+.bubble.bot{margin-right:auto;background:rgba(255,106,0,.10)}
+.bubble.sys{
+  margin:10px auto;max-width:95%;
+  background:rgba(255,255,255,.04);
+  color:var(--muted);font-size:12px
+}
+
+.chatInputRow{display:flex;gap:10px;margin-top:14px}
+.chatInputRow input{
+  flex:1;padding:14px;border-radius:12px;
+  border:1px solid rgba(255,45,45,.20);
+  background:rgba(0,0,0,.25);color:var(--text)
+}
+
+.historyList{
+  border:1px solid rgba(255,45,45,.20);
+  border-radius:14px;background:rgba(0,0,0,.18);
+  overflow:hidden;margin-top:14px
+}
+.historyItem{
+  padding:12px 14px;border-bottom:1px solid rgba(255,45,45,.15)
+}
+.historyItem:last-child{border-bottom:none}
+.meta{font-size:12px;color:var(--muted)}
+
+.notice{
+  margin-top:12px;
+  border:1px dashed rgba(255,45,45,.35);
+  background:rgba(255,45,45,.07);
+  padding:10px 12px;border-radius:12px;
+  font-size:12px;color:var(--muted)
+}
+
+/* planos/login */
+.planTitle{margin:0 0 6px;color:var(--accent)}
+.price{font-size:26px;font-weight:900;margin:10px 0}
+.feature{font-size:13px;color:var(--muted);margin:6px 0}
+hr.sep{border:none;border-top:1px solid rgba(255,45,45,.12);margin:12px 0}
+</style>
 </head>
+
 <body>
-    <header>
-        <img id="logo" src="logo.JPG" alt="Logo">
-    </header>
-    <button class="login-button" onclick="showLoginModal()">LOGIN</button>
-    <img id="user-logo" class="user-logo" src="" alt="User Logo">
-    <main>
-        <h2>Controle do Caixa</h2>
-        <div class="balance">
-            Saldo Atual: R$ <span id="balance">0.00</span>
+<header>
+  <div class="brand"><div class="dot"></div>MTA Script Tool</div>
+  <div class="row">
+    <span class="pill alpha" id="versionPill">Versão: ALPHA</span>
+    <span class="pill" id="backendPill">Backend: ?</span>
+    <span class="pill" id="modePill">Modo: Planos</span>
+    <button class="btn secondary" id="logoutBtn" onclick="logout()" style="display:none">Sair</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- TELA: PLANOS + LOGIN -->
+  <section class="section active card" id="plansSec">
+    <h3 style="margin:0 0 6px 0;color:var(--accent)">Escolha seu plano</h3>
+    <div class="meta">Você precisa estar logado e com um plano ativo para usar a ferramenta.</div>
+
+    <div class="grid" style="margin-top:14px">
+      <div class="card">
+        <div class="tag">Básico</div>
+        <h3 class="planTitle">Plano Básico</h3>
+        <div class="price">R$ 19,90</div>
+        <div class="feature">✅ Criar Script do Zero</div>
+        <div class="feature">✅ Histórico</div>
+        <div class="feature">❌ Copiar Script</div>
+        <hr class="sep">
+        <button class="btn" onclick="choosePlan('basic')">Escolher Básico</button>
+      </div>
+
+      <div class="card">
+        <div class="tag">Avançado</div>
+        <h3 class="planTitle">Plano Avançado</h3>
+        <div class="price">R$ 39,90</div>
+        <div class="feature">✅ Criar Script do Zero</div>
+        <div class="feature">✅ Histórico</div>
+        <div class="feature">✅ Copiar Script</div>
+        <hr class="sep">
+        <button class="btn" onclick="choosePlan('advanced')">Escolher Avançado</button>
+      </div>
+    </div>
+
+    <div class="notice">
+      Para testar rápido, o backend pode estar em <b>modo pagamento simulado</b> (um clique ativa seu plano).
+      Depois você liga pagamento real (Stripe/MercadoPago).
+    </div>
+
+    <hr class="sep">
+
+    <h3 style="margin:0 0 6px 0;color:var(--accent)">Login</h3>
+    <div class="grid">
+      <div class="card">
+        <div class="label">Email</div>
+        <input class="input" id="email" placeholder="seuemail@gmail.com">
+        <div class="label">Senha</div>
+        <input class="input" id="password" type="password" placeholder="••••••••">
+        <div class="row" style="margin-top:14px">
+          <button class="btn" onclick="login()">Entrar</button>
+          <button class="btn secondary" onclick="register()">Criar conta</button>
         </div>
+        <div class="notice" id="authMsg" style="display:none"></div>
+      </div>
 
-        <div class="form-group">
-            <label for="add-amount">Adicionar Dinheiro:</label>
-            <input type="number" id="add-amount" placeholder="Valor a adicionar">
-            <button onclick="addMoney()">Adicionar</button>
+      <div class="card">
+        <h3 style="margin:0 0 6px 0;color:var(--accent)">Plano selecionado</h3>
+        <div class="meta" id="selectedPlanText">Nenhum</div>
+        <div class="notice">
+          Depois do login, você ativa o plano escolhido (simulado) ou é redirecionado ao pagamento (real).
         </div>
+        <button class="btn" style="margin-top:10px" onclick="activateSelectedPlan()">Ativar plano escolhido</button>
+      </div>
+    </div>
+  </section>
 
-        <div class="form-group">
-            <label for="withdraw-amount">Retirar Dinheiro:</label>
-            <input type="number" id="withdraw-amount" placeholder="Valor a retirar">
-            <button onclick="withdrawMoney()">Retirar</button>
+  <!-- HOME (dashboard) -->
+  <div class="grid section" id="home">
+    <div class="card action" onclick="openCreate()">
+      <div class="tag">IA → ZIP</div>
+      <h3>Criar Script do Zero</h3>
+      <p>Descreva o script e gere meta.xml + Lua automaticamente.</p>
+    </div>
+
+    <div class="card action" id="copyCard" onclick="openCopy()">
+      <div class="tag">Upload</div>
+      <h3>Copiar Script</h3>
+      <p>Envie um script existente e gere uma versão similar.</p>
+    </div>
+
+    <div class="card action" onclick="openHistory()">
+      <div class="tag">Real</div>
+      <h3>Histórico</h3>
+      <p>Veja os ZIPs criados na pasta Scripts_Criados.</p>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <section class="section card" id="chatSec">
+    <div class="chatHeader">
+      <div>
+        <strong id="chatTitle">Criar Script</strong>
+        <div class="meta" id="chatDesc"></div>
+      </div>
+      <div class="row">
+        <button class="btn secondary" onclick="goHome()">Voltar</button>
+        <button class="btn" onclick="generateZip()">Gerar ZIP</button>
+      </div>
+    </div>
+
+    <div class="chatBox" id="chatBox"></div>
+
+    <div class="chatInputRow">
+      <input id="chatInput" placeholder="Descreva o script de MTA..." />
+      <button class="btn" onclick="sendChat()">Enviar</button>
+    </div>
+
+    <div class="notice">
+      A IA responde no chat. O botão <b>Gerar ZIP</b> cria o resource completo na pasta <b>Scripts_Criados</b>.
+    </div>
+  </section>
+
+  <!-- COPY -->
+  <section class="section card" id="copySec">
+    <h3>Copiar Script</h3>
+
+    <div class="label">Nome do novo script</div>
+    <input class="input" id="copyName">
+
+    <div class="label">Arquivos (meta.xml e .lua)</div>
+    <input class="input" type="file" id="copyFiles" multiple>
+
+    <div class="row" style="margin-top:14px">
+      <button class="btn" onclick="copyScript()">Copiar + ZIP</button>
+      <button class="btn secondary" onclick="goHome()">Voltar</button>
+    </div>
+
+    <div class="notice" id="copyResult" style="display:none"></div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="section card" id="historySec">
+    <div class="row" style="justify-content:space-between">
+      <h3>Histórico Real</h3>
+      <div class="row">
+        <button class="btn" onclick="loadHistory()">Atualizar</button>
+        <button class="btn secondary" onclick="goHome()">Voltar</button>
+      </div>
+    </div>
+
+    <div class="historyList" id="historyList"></div>
+  </section>
+</main>
+
+<script>
+const BACKEND = "http://localhost:3000";
+
+const plansSec = document.getElementById("plansSec");
+const home = document.getElementById("home");
+const chatSec = document.getElementById("chatSec");
+const copySec = document.getElementById("copySec");
+const historySec = document.getElementById("historySec");
+const copyCard = document.getElementById("copyCard");
+
+const chatBox = document.getElementById("chatBox");
+const chatInput = document.getElementById("chatInput");
+const chatTitle = document.getElementById("chatTitle");
+const chatDesc = document.getElementById("chatDesc");
+
+const authMsg = document.getElementById("authMsg");
+const logoutBtn = document.getElementById("logoutBtn");
+const selectedPlanText = document.getElementById("selectedPlanText");
+
+let token = localStorage.getItem("token") || "";
+let selectedPlan = localStorage.getItem("selectedPlan") || "";
+let me = null; // { email, plan }
+
+let current = { nome:"", desc:"", pedido:"" };
+
+function setMode(m){ document.getElementById("modePill").innerText="Modo: "+m }
+function showMsg(text){
+  authMsg.style.display="block";
+  authMsg.textContent=text;
+}
+
+function setSelectedPlan(p){
+  selectedPlan = p;
+  localStorage.setItem("selectedPlan", p);
+  selectedPlanText.textContent = p ? (p === "basic" ? "Básico" : "Avançado") : "Nenhum";
+}
+
+setSelectedPlan(selectedPlan);
+
+function showSection(el){
+  [plansSec, home, chatSec, copySec, historySec].forEach(x=>x.classList.remove("active"));
+  el.classList.add("active");
+}
+
+function applyPlanUI(){
+  const plan = me?.plan || "none";
+  // Básico: sem copiar script
+  if(plan === "basic"){
+    copyCard.style.display = "none";
+  } else {
+    copyCard.style.display = "block";
+  }
+}
+
+function goDashboard(){
+  applyPlanUI();
+  showSection(home);
+  setMode("Home");
+  logoutBtn.style.display = "inline-block";
+}
+
+function goPlans(){
+  showSection(plansSec);
+  setMode("Planos");
+  logoutBtn.style.display = token ? "inline-block" : "none";
+}
+
+function goHome(){
+  showSection(home);
+  setMode("Home");
+}
+
+async function fetchMe(){
+  if(!token) return null;
+  try{
+    const r = await fetch(BACKEND+"/me", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    if(!r.ok) return null;
+    return await r.json();
+  }catch{
+    return null;
+  }
+}
+
+async function boot(){
+  // ping backend
+  fetch(BACKEND+"/historico").then(()=>document.getElementById("backendPill").innerText="Backend: online")
+  .catch(()=>document.getElementById("backendPill").innerText="Backend: offline");
+
+  me = await fetchMe();
+  if(me && me.plan && me.plan !== "none"){
+    goDashboard();
+  }else{
+    goPlans();
+  }
+}
+boot();
+
+/* Planos */
+function choosePlan(p){
+  setSelectedPlan(p);
+}
+
+/* Auth */
+async function register(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  if(!email || !password) return showMsg("Preencha email e senha.");
+
+  const r = await fetch(BACKEND+"/auth/register", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  const d = await r.json().catch(()=>({}));
+  if(!r.ok) return showMsg(d.erro || "Erro ao criar conta.");
+  showMsg("Conta criada! Agora clique em Entrar.");
+}
+
+async function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  if(!email || !password) return showMsg("Preencha email e senha.");
+
+  const r = await fetch(BACKEND+"/auth/login", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  const d = await r.json().catch(()=>({}));
+  if(!r.ok) return showMsg(d.erro || "Falha no login.");
+
+  token = d.token;
+  localStorage.setItem("token", token);
+
+  me = await fetchMe();
+  showMsg("Login OK. Agora ative um plano.");
+}
+
+function logout(){
+  token = "";
+  me = null;
+  localStorage.removeItem("token");
+  logoutBtn.style.display = "none";
+  goPlans();
+}
+
+/* Ativar plano (simulado ou redireciona pro checkout real no backend) */
+async function activateSelectedPlan(){
+  if(!token) return showMsg("Faça login primeiro.");
+  if(!selectedPlan) return showMsg("Escolha um plano (Básico ou Avançado).");
+
+  // chama backend, que pode estar em modo simulado ou real (Stripe)
+  const r = await fetch(BACKEND+"/billing/checkout", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer " + token
+    },
+    body: JSON.stringify({ plan: selectedPlan })
+  });
+
+  const d = await r.json().catch(()=>({}));
+
+  if(!r.ok) return showMsg(d.erro || "Falha ao iniciar pagamento.");
+
+  // modo real: backend retorna url do checkout
+  if(d.checkoutUrl){
+    window.location.href = d.checkoutUrl;
+    return;
+  }
+
+  // modo simulado: backend já ativou e devolveu me
+  me = await fetchMe();
+  if(me && me.plan !== "none"){
+    goDashboard();
+  } else {
+    showMsg("Não foi possível ativar o plano.");
+  }
+}
+
+/* App (as mesmas funções de antes, agora com token) */
+function openCreate(){
+  const nome = prompt("Nome do script:");
+  if(!nome) return;
+  const desc = prompt("Descrição:");
+  current = { nome, desc, pedido:"" };
+  chatTitle.innerText = nome;
+  chatDesc.innerText = desc || "";
+  chatBox.innerHTML="";
+  addBubble("sys","Chat focado em MTA. Descreva o script.");
+  showSection(chatSec);
+  setMode("Chat");
+}
+
+function openCopy(){
+  showSection(copySec);
+  setMode("Copiar");
+}
+
+function openHistory(){
+  showSection(historySec);
+  setMode("Histórico");
+  loadHistory();
+}
+
+function addBubble(type,text){
+  const d=document.createElement("div");
+  d.className="bubble "+type;
+  d.textContent=text;
+  chatBox.appendChild(d);
+  chatBox.scrollTop=chatBox.scrollHeight;
+}
+
+async function sendChat(){
+  const t=chatInput.value.trim();
+  if(!t) return;
+  addBubble("user",t);
+  current.pedido += "\n"+t;
+  chatInput.value="";
+
+  const r=await fetch(BACKEND+"/chat",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+token
+    },
+    body:JSON.stringify({mensagem:t})
+  });
+
+  const d=await r.json().catch(()=>({}));
+  addBubble("bot", d.resposta || d.erro || "Sem resposta");
+}
+
+async function generateZip(){
+  const r=await fetch(BACKEND+"/criar",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+token
+    },
+    body:JSON.stringify(current)
+  });
+
+  const d=await r.json().catch(()=>({}));
+  addBubble("sys", d.sucesso ? "ZIP criado: "+d.zipName : "Erro: "+d.erro);
+}
+
+async function copyScript(){
+  const files=document.getElementById("copyFiles").files;
+  const name=document.getElementById("copyName").value;
+  if(!files.length) return alert("Selecione os arquivos.");
+
+  const fd=new FormData();
+  fd.append("nome",name);
+  for(const f of files) fd.append("files",f);
+
+  const r=await fetch(BACKEND+"/copiar",{
+    method:"POST",
+    headers:{ "Authorization":"Bearer "+token },
+    body:fd
+  });
+
+  const d=await r.json().catch(()=>({}));
+  const box=document.getElementById("copyResult");
+  box.style.display="block";
+  box.innerText=d.sucesso?"ZIP criado: "+d.zipName:"Erro: "+(d.erro||"falha");
+}
+
+async function loadHistory(){
+  const r=await fetch(BACKEND+"/historico",{
+    headers:{ "Authorization":"Bearer "+token }
+  });
+
+  const d=await r.json().catch(()=>({}));
+  const list=document.getElementById("historyList");
+  list.innerHTML="";
+
+  if(!d.items||!d.items.length){
+    list.innerHTML="<div class='historyItem'>Nenhum ZIP encontrado.</div>";
+    return;
+  }
+
+  d.items.forEach(i=>{
+    const div=document.createElement("div");
+    div.className="historyItem";
+    div.innerHTML = `
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <strong>${i.name}</strong>
+          <div class="meta">${new Date(i.mtime).toLocaleString()}</div>
         </div>
-
-        <div class="logs">
-            <h3>Logs de Operações:</h3>
-            <div id="logs"></div>
+        <div class="row">
+          <button class="btn secondary" onclick="downloadZip('${encodeURIComponent(i.name)}')">Baixar</button>
         </div>
-    </main>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
 
-    <script>
-        let balance = 0;
-        let currentUser = null;
-        const users = {
-            Ryan: "Ryanlima2004.",
-            Italo: "Italo123"
-        };
-        const userLogos = {
-            Ryan: "logoryan.JPG",
-            Italo: "logoitalo.JPG"
-        };
-
-        const balanceElement = document.getElementById('balance');
-        const logsElement = document.getElementById('logs');
-        const logoElement = document.getElementById('logo'); // logo.JPG fica fixa
-        const userLogoElement = document.getElementById('user-logo'); // logo do usuário à direita
-
-        // Carregar logs do localStorage
-        function loadLogs() {
-            const storedLogs = JSON.parse(localStorage.getItem('logs')) || [];
-            storedLogs.forEach(log => {
-                const logEntry = document.createElement('p');
-                logEntry.textContent = log;
-                logsElement.appendChild(logEntry);
-            });
-        }
-
-        // Salvar logs no localStorage
-        function saveLogs() {
-            const logs = [];
-            document.querySelectorAll('.logs p').forEach(log => {
-                logs.push(log.textContent);
-            });
-            localStorage.setItem('logs', JSON.stringify(logs));
-        }
-
-        function showLoginModal() {
-            const username = prompt("Digite seu usuário:");
-            const password = prompt("Digite sua senha:");
-            
-            if (users[username] && users[username] === password) {
-                currentUser = username;
-                userLogoElement.src = userLogos[username]; // Altera apenas a imagem do usuário
-                userLogoElement.style.display = "inline-block"; // Exibe a imagem do usuário
-                alert(`Bem-vindo, ${username}!`);
-            } else {
-                alert("Usuário ou senha inválidos.");
-                userLogoElement.style.display = "none"; // Esconde a imagem do usuário se o login falhar
-            }
-        }
-
-        function addMoney() {
-            if (!currentUser) {
-                alert("Faça login antes de realizar uma operação.");
-                return;
-            }
-
-            const amount = parseFloat(document.getElementById('add-amount').value);
-            if (!isNaN(amount) && amount > 0) {
-                balance += amount;
-                updateBalance();
-                logOperation('adicionado', amount);
-                document.getElementById('add-amount').value = '';
-            } else {
-                alert('Por favor, insira um valor válido para adicionar.');
-            }
-        }
-
-        function withdrawMoney() {
-            if (!currentUser) {
-                alert("Faça login antes de realizar uma operação.");
-                return;
-            }
-
-            const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            if (!isNaN(amount) && amount > 0) {
-                if (amount <= balance) {
-                    balance -= amount;
-                    updateBalance();
-                    logOperation('retirado', amount);
-                    document.getElementById('withdraw-amount').value = '';
-                } else {
-                    alert('Saldo insuficiente para realizar a retirada.');
-                }
-            } else {
-                alert('Por favor, insira um valor válido para retirar.');
-            }
-        }
-
-        function updateBalance() {
-            balanceElement.textContent = balance.toFixed(2);
-        }
-
-        // Enviar log para a página de logs
-        function logOperation(type, amount) {
-            const now = new Date();
-            const timestamp = now.toLocaleString('pt-BR');
-            const logMessage = `Usuário ${currentUser} ${type} R$ ${amount.toFixed(2)} em ${timestamp}.`;
-
-            // Criação do elemento de log na interface
-            const logEntry = document.createElement('p');
-            logEntry.textContent = logMessage;
-            logsElement.appendChild(logEntry);
-
-            // Enviar log para a página de logs externa
-            fetch('https://huzz100k.github.io/caixa-de-logs/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ log: logMessage })
-            }).catch((error) => {
-                console.error('Erro ao enviar log:', error);
-            });
-
-            saveLogs(); // Salva as logs após cada operação
-        }
-
-        // Carregar as logs ao carregar a página
-        window.onload = loadLogs;
-    </script>
+function downloadZip(zipNameEncoded){
+  // download protegido (backend valida token via query)
+  window.location.href = BACKEND + "/download/" + zipNameEncoded + "?token=" + encodeURIComponent(token);
+}
+</script>
 </body>
 </html>
